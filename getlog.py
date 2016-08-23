@@ -29,24 +29,29 @@ def getopt():
     return (access_token, date, bucket_name, domain)
 
 def getlog(access_token, bucket_name, date, domain):
-    headers = {
-        'Authorization': 'Bearer ' + access_token        
-    }
+    try:
+        headers = {
+            'Authorization': 'Bearer ' + access_token        
+        }
 
-    response = requests.get(api + '/analysis/archives/?bucket_name=' + bucket_name + '&date=' + date + '&domain=' + domain, headers = headers)
-    response = json.loads(response.text)
-    datas = response['data']
-    
-    fo = open('log_lists.txt', 'w')
-    if datas:
-        for data in datas:
-            fo.write(data['url'] + "\n")
-            print data['url']
-    else:
-        print '--- 不存在相关日志下载列表 ---'
+        response = requests.get(api + '/analysis/archives/?bucket_name=' + bucket_name + '&date=' + date + '&domain=' + domain, headers = headers)
+        response = json.loads(response.text)
+        datas = response['data']
+        
+        fo = open('log_lists.txt', 'w')
+        if datas:
+            for data in datas:
+                fo.write(data['url'] + "\n")
+                print data['url']
+        else:
+            print '--- 不存在相关日志下载列表 ---'
+            sys.exit()
+
+        fo.close()
+    except:
+        print '--- 请检查参数是否正确 ---'
         sys.exit()
 
-    fo.close()
 
 def getday(date):
     if re.search('~', date):
@@ -68,18 +73,19 @@ def getday(date):
 
     return date
 
-num = len(sys.argv[1:])
+if __name__ == '__main__':
+    num = len(sys.argv[1:])
 
-if num < 3:
-    print '---'
-    print '--- 请检查是否正确输入了必选项 access_token date 和 bucket_name 参数的值 ---'
-    print '---'
-    sys.exit()
+    if num < 3:
+        print '---'
+        print '--- 请检查是否正确输入了必选项 access_token date 和 bucket_name 参数的值 ---'
+        print '---'
+        sys.exit()
 
-access_token, date, bucket_name, domain = getopt()
-date = getday(date)
+    access_token, date, bucket_name, domain = getopt()
+    date = getday(date)
 
-for date in date:
-    getlog(access_token, bucket_name, date, domain)
+    for date in date:
+        getlog(access_token, bucket_name, date, domain)
 
-print '--- 日志下载列表写入文件完成 ---'
+    print '--- 日志下载列表写入文件完成 ---'
